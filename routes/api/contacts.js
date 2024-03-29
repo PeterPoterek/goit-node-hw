@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { listContacts } = require("../../models/contacts.js");
+const { listContacts, getContactById } = require("../../models/contacts.js");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -13,7 +13,17 @@ router.get("/", async (req, res, next) => {
 });
 
 router.get("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const contactId = req.params.contactId;
+  try {
+    const contact = await getContactById(contactId);
+    if (contact) {
+      res.status(200).json(contact);
+    } else {
+      res.status(404).json({ message: "Not found" });
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/", async (req, res, next) => {
