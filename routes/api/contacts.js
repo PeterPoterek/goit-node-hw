@@ -6,7 +6,7 @@ const { listContacts } = require("../../models/contacts.js");
 router.get("/", async (req, res, next) => {
   try {
     const contacts = await listContacts();
-    res.json(contacts);
+    res.status(200).json(contacts);
   } catch (error) {
     next(error);
   }
