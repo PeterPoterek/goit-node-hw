@@ -1,25 +1,93 @@
-const express = require('express')
+const express = require("express");
+const router = express.Router();
+const { v4 } = require("uuid");
 
-const router = express.Router()
+const { 
+  addContact, 
+  getContactById, 
+  listContacts, 
+  removeContact, 
+  updateContact 
+} = require("../../models/contacts.js");
 
-router.get('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+const { contactSchema } = require("../../validation.js");
 
-router.get('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/", async (req, res, next) => {
+  try {
+    const contacts = await listContacts();
+    res.status(200).json(contacts);
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.post('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/:contactId", async (req, res, next) => {
+  const contactId = req.params.contactId;
+  try {
+    const contact = await getContactById(contactId);
+    if (contact) {
+      res.status(200).json(contact);
+    } else {
+      res.status(404).json({ message: "Not found" });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.delete('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.post("/", async (req, res, next) => {
+  try {
+    const { error } = contactSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
 
-router.put('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+    const id = v4().replace(/-/g, "").substring(0, 20);
+    const newContact = { id, ...req.body };
 
-module.exports = router
+    await addContact(newContact);
+
+    res.status(201).json(newContact);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:contactId", async (req, res, next) => {
+  const contactId = req.params.contactId;
+  try {
+    const contact = await getContactById(contactId);
+    if (!contact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    await removeContact(contactId);
+
+    res.status(200).json({ message: "Contact deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/:contactId", async (req, res, next) => {
+  const contactId = req.params.contactId;
+  try {
+    const { error } = contactSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    const existingContact = await getContactById(contactId);
+    if (!existingContact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    const updatedContact = await updateContact(contactId, req.body);
+
+    res.status(200).json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;
