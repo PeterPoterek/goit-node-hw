@@ -1,7 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { v4 } = require("uuid");
-const { listContacts, getContactById, removeContact, addContact, updateContact } = require("../../models/contacts.js");
+
+const { 
+  addContact, 
+  getContactById, 
+  listContacts, 
+  removeContact, 
+  updateContact 
+} = require("../../models/contacts.js");
+
 const { contactSchema } = require("../../validation.js");
 
 router.get("/", async (req, res, next) => {
