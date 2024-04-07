@@ -11,8 +11,13 @@ const getAllContacts = async (req, res) => {
 };
 
 const getContact = async (req, res) => {
-  const contact = await fetchContact(req.params.contactId);
-  res.json(contact);
+  try {
+    const contact = await fetchContact(req.params.contactId);
+    res.json(contact);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
 };
 
 module.exports = { getAllContacts, getContact };
