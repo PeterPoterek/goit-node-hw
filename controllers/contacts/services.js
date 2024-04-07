@@ -8,4 +8,10 @@ const fetchContact = (id) => {
   return Contact.findOne({ _id: id });
 };
 
-module.exports = { fetchContacts, fetchContact };
+const createNewContact = async (contactData) => {
+  const newContact = await Contact.create(contactData);
+  console.log("User created successfully:", newContact);
+  return newContact;
+};
+
+module.exports = { fetchContacts, fetchContact, createNewContact };
