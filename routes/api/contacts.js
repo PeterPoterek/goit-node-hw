@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getAllContacts,
-  getContact,
   createContact,
   deleteContactById,
+  getAllContacts,
+  getContact,
   updateContactById,
   updateFavoriteStatus,
 } = require("../../controllers/contacts/index.js");

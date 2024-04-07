@@ -1,4 +1,4 @@
-const { fetchContacts, fetchContact, createNewContact, deleteContact, updateContact } = require("./services.js");
+const { createNewContact, deleteContact, fetchContact, fetchContacts, updateContact } = require("./services.js");
 
 const getAllContacts = async (req, res) => {
   try {
