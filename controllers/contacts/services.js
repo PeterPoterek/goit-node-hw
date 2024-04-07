@@ -22,4 +22,8 @@ const updateContact = async (id, updatedData) => {
   return Contact.findByIdAndUpdate(id, updatedData, { new: true });
 };
 
-module.exports = { fetchContacts, fetchContact, createNewContact, deleteContact, updateContact };
+const updateStatusContact = async (id, favorite) => {
+  return Contact.findByIdAndUpdate(id, { favorite }, { new: true });
+};
+
+module.exports = { fetchContacts, fetchContact, createNewContact, deleteContact, updateContact, updateStatusContact };

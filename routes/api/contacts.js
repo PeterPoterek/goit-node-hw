@@ -1,7 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-const { getAllContacts, getContact, createContact, deleteContactById, updateContactById } = require("../../controllers/contacts/index.js");
+const {
+  getAllContacts,
+  getContact,
+  createContact,
+  deleteContactById,
+  updateContactById,
+  updateFavoriteStatus,
+} = require("../../controllers/contacts/index.js");
 
 router.get("/", async (req, res, next) => {
   getAllContacts(req, res);
@@ -21,6 +28,10 @@ router.delete("/:contactId", async (req, res, next) => {
 
 router.put("/:contactId", async (req, res, next) => {
   updateContactById(req, res);
+});
+
+router.patch("/:contactId/favorite", async (req, res, next) => {
+  updateFavoriteStatus(req, res);
 });
 
 module.exports = router;
