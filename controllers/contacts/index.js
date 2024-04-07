@@ -1,4 +1,4 @@
-const { fetchContacts, fetchContact, createNewContact } = require("./services.js");
+const { fetchContacts, fetchContact, createNewContact, deleteContact } = require("./services.js");
 
 const getAllContacts = async (req, res) => {
   try {
@@ -31,4 +31,20 @@ const createContact = async (req, res) => {
   }
 };
 
-module.exports = { getAllContacts, getContact, createContact };
+const deleteContactById = async (req, res) => {
+  try {
+    const deletedContact = await deleteContact(req.params.contactId);
+    if (deletedContact) {
+      console.log("User deleted successfully:", deletedContact);
+      res.json({ message: "Contact deleted successfully" });
+    } else {
+      console.log("Contact not found");
+      res.status(404).json({ message: "Contact not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+};
+
+module.exports = { getAllContacts, getContact, createContact, deleteContactById };

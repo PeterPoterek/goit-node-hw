@@ -14,4 +14,8 @@ const createNewContact = async (contactData) => {
   return newContact;
 };
 
-module.exports = { fetchContacts, fetchContact, createNewContact };
+const deleteContact = async (id) => {
+  return Contact.findByIdAndDelete(id);
+};
+
+module.exports = { fetchContacts, fetchContact, createNewContact, deleteContact };
