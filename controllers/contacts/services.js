@@ -18,4 +18,8 @@ const deleteContact = async (id) => {
   return Contact.findByIdAndDelete(id);
 };
 
-module.exports = { fetchContacts, fetchContact, createNewContact, deleteContact };
+const updateContact = async (id, updatedData) => {
+  return Contact.findByIdAndUpdate(id, updatedData, { new: true });
+};
+
+module.exports = { fetchContacts, fetchContact, createNewContact, deleteContact, updateContact };
