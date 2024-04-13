@@ -15,11 +15,11 @@ router.get("/", async (req, res, next) => {
 });
 
 router.get("/:contactId", async (req, res, next) => {
-  getContact(req.body);
+  getContact(req, res);
 });
 
 router.post("/", async (req, res, next) => {
-  router.post('/', createContact);
+  createContact(req, res);
 });
 
 router.delete("/:contactId", async (req, res, next) => {
