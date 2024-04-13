@@ -19,7 +19,7 @@ router.get("/:contactId", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  createContact(req, res);
+  router.post('/', createContact);
 });
 
 router.delete("/:contactId", async (req, res, next) => {
