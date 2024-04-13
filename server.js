@@ -8,7 +8,7 @@ const connection = mongoose.connect(urlDb);
 
 const startServer = async () => {
   try {
-    await connection;
+    await mongoose.connect(urlDb);
 
     console.log("Database connection successful");
 
