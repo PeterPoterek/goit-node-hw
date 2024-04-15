@@ -1,8 +1,9 @@
-const { createNewContact, deleteContact, fetchContact, fetchContacts, updateContact } = require("./services.js");
+const { createNewContact, deleteContact, fetchContact, fetchContacts, updateContact, updateStatusContact } = require("./services.js");
 
 const getAllContacts = async (req, res) => {
   try {
-    const contacts = await fetchContacts();
+    const userId = req.user._id;
+    const contacts = await fetchContacts(userId);
     res.json(contacts);
   } catch (err) {
     console.error(err);
@@ -12,7 +13,8 @@ const getAllContacts = async (req, res) => {
 
 const getContact = async (req, res) => {
   try {
-    const contact = await fetchContact(req.params.contactId);
+    const userId = req.user._id;
+    const contact = await fetchContact(userId, req.params.contactId);
     res.json(contact);
   } catch (err) {
     console.error(err);
@@ -22,8 +24,9 @@ const getContact = async (req, res) => {
 
 const createContact = async (req, res) => {
   try {
-    const newContact = await createNewContact(req.body);
-    console.log("User created successfully:", newContact);
+    const userId = req.user._id;
+    const newContact = await createNewContact(userId, req.body);
+    console.log("Contact created successfully:", newContact);
     res.status(201).json(newContact);
   } catch (err) {
     console.error(err);
@@ -33,9 +36,10 @@ const createContact = async (req, res) => {
 
 const deleteContactById = async (req, res) => {
   try {
-    const deletedContact = await deleteContact(req.params.contactId);
+    const userId = req.user._id;
+    const deletedContact = await deleteContact(userId, req.params.contactId);
     if (deletedContact) {
-      console.log("User deleted successfully:", deletedContact);
+      console.log("Contact deleted successfully:", deletedContact);
       res.json({ message: "Contact deleted successfully" });
     } else {
       console.log("Contact not found");
@@ -49,9 +53,10 @@ const deleteContactById = async (req, res) => {
 
 const updateContactById = async (req, res) => {
   try {
-    const updatedContact = await updateContact(req.params.contactId, req.body);
+    const userId = req.user._id;
+    const updatedContact = await updateContact(userId, req.params.contactId, req.body);
     if (updatedContact) {
-      console.log("User updated successfully:", updatedContact);
+      console.log("Contact updated successfully:", updatedContact);
       res.json(updatedContact);
     } else {
       console.log("Contact not found");
@@ -65,11 +70,12 @@ const updateContactById = async (req, res) => {
 
 const updateFavoriteStatus = async (req, res) => {
   try {
+    const userId = req.user._id;
     const { favorite } = req.body;
     if (!favorite) {
       return res.status(400).json({ message: "Missing field favorite" });
     }
-    const updatedContact = await updateStatusContact(req.params.contactId, favorite);
+    const updatedContact = await updateStatusContact(userId, req.params.contactId, favorite);
     if (updatedContact) {
       console.log("Favorite status updated successfully:", updatedContact);
       res.json(updatedContact);
@@ -83,4 +89,11 @@ const updateFavoriteStatus = async (req, res) => {
   }
 };
 
-module.exports = { getAllContacts, getContact, createContact, deleteContactById, updateContactById, updateFavoriteStatus };
+module.exports = {
+  getAllContacts,
+  getContact,
+  createContact,
+  deleteContactById,
+  updateContactById,
+  updateFavoriteStatus,
+};
