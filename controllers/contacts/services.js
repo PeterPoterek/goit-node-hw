@@ -1,9 +1,14 @@
 const Contact = require("../../models/contacts/contacts.js");
 
-const fetchContacts = (userId, page, limit) => {
+const fetchContacts = (userId, page, limit, favorite) => {
   const skip = (page - 1) * limit;
-  return Contact.find({ owner: userId }).skip(skip).limit(limit);
+  let query = { owner: userId };
+  if (favorite !== undefined) {
+    query.favorite = favorite;
+  }
+  return Contact.find(query).skip(skip).limit(limit);
 };
+
 const fetchContact = (userId, id) => {
   return Contact.findOne({ _id: id, owner: userId });
 };

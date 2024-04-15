@@ -3,13 +3,15 @@ const { createNewContact, deleteContact, fetchContact, fetchContacts, updateCont
 const getAllContacts = async (req, res, page, limit) => {
   try {
     const userId = req.user._id;
-    const contacts = await fetchContacts(userId, page, limit);
+    const { favorite } = req.query;
+    const contacts = await fetchContacts(userId, page, limit, favorite);
     res.json(contacts);
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
   }
 };
+
 const getContact = async (req, res) => {
   try {
     const userId = req.user._id;
