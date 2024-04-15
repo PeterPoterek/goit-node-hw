@@ -2,8 +2,15 @@ const express = require("express");
 const router = express.Router();
 const User = require("../../models/users/user");
 const jwt = require("jsonwebtoken");
+const { signupSchema, loginSchema } = require("../../validation.js");
 
 router.post("/signup", async (req, res, next) => {
+  const { error } = signupSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   const { email, password } = req.body;
 
   const user = await User.findOne({ email }, { _id: 1 }).lean();
@@ -24,24 +31,42 @@ router.post("/signup", async (req, res, next) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const { error } = loginSchema.validate(req.body);
 
-  if (!user) {
-    return res.status(401).json({ message: `${email} - does not exists.` });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
   }
-  const isPasswordCorrect = await user.validatePassword(password);
-  if (isPasswordCorrect) {
-    const payload = {
-      id: user._id,
-      username: user.username,
-    };
 
-    const token = jwt.sign(payload, process.env.SECRET, { expiresIn: "12h" });
-    return res.json({ token });
-  } else {
-    return res.status(401).json({ message: "Password is wrong" });
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: "Email or password is wrong." });
+    }
+
+    const isPasswordCorrect = await user.validatePassword(password);
+
+    if (isPasswordCorrect) {
+      const payload = {
+        id: user._id,
+        email: user.email,
+        subscription: user.subscription,
+      };
+
+      const token = jwt.sign(payload, process.env.SECRET, { expiresIn: "12h" });
+
+      return res.status(200).json({ token, user: { email: user.email, subscription: user.subscription } });
+    } else {
+      return res.status(401).json({ message: "Email or password is wrong." });
+    }
+  } catch (err) {
+    console.error("Error during login:", err);
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 });
+
+router.post("/logout", async (req, res) => {});
 
 module.exports = router;
