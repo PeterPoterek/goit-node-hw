@@ -101,4 +101,26 @@ router.get("/current", authMiddleware, async (req, res) => {
   }
 });
 
+router.patch("/:userId", authMiddleware, async (req, res) => {
+  try {
+    const { subscription } = req.body;
+    const { userId } = req.params;
+
+    if (!["starter", "pro", "business"].includes(subscription)) {
+      return res.status(400).json({ message: "Invalid subscription value." });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, { subscription }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.status(200).json({ message: "Subscription updated successfully.", user: updatedUser });
+  } catch (err) {
+    console.error("Error updating subscription:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
