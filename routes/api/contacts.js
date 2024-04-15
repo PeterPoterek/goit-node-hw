@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const authMiddleware = require("../../middlewares/jwt.js");
+
 const {
   createContact,
   deleteContactById,
@@ -9,6 +11,8 @@ const {
   updateContactById,
   updateFavoriteStatus,
 } = require("../../controllers/contacts/index.js");
+
+router.use(authMiddleware);
 
 router.get("/", async (req, res, next) => {
   getAllContacts(req, res);
