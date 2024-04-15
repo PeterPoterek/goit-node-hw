@@ -15,7 +15,9 @@ const {
 router.use(authMiddleware);
 
 router.get("/", async (req, res, next) => {
-  getAllContacts(req, res);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  getAllContacts(req, res, page, limit);
 });
 
 router.get("/:contactId", async (req, res, next) => {

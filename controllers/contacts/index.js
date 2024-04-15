@@ -1,20 +1,23 @@
 const { createNewContact, deleteContact, fetchContact, fetchContacts, updateContact, updateStatusContact } = require("./services.js");
 
-const getAllContacts = async (req, res) => {
+const getAllContacts = async (req, res, page, limit) => {
   try {
     const userId = req.user._id;
-    const contacts = await fetchContacts(userId);
+    const contacts = await fetchContacts(userId, page, limit);
     res.json(contacts);
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
   }
 };
-
 const getContact = async (req, res) => {
   try {
     const userId = req.user._id;
     const contact = await fetchContact(userId, req.params.contactId);
+    if (!contact) {
+      console.log("Contact not found");
+      return res.status(404).json({ message: "Contact not found" });
+    }
     res.json(contact);
   } catch (err) {
     console.error(err);
