@@ -20,6 +20,7 @@ router.get("/", async (req, res, next) => {
   const favorite = req.query.favorite === "true";
   getAllContacts(req, res, page, limit, favorite);
 });
+
 router.get("/:contactId", async (req, res, next) => {
   getContact(req, res);
 });
