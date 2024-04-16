@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const authMiddleware = require("../../middlewares/jwt.js");
+
 const {
   createContact,
   deleteContactById,
@@ -10,8 +12,13 @@ const {
   updateFavoriteStatus,
 } = require("../../controllers/contacts/index.js");
 
+router.use(authMiddleware);
+
 router.get("/", async (req, res, next) => {
-  getAllContacts(req, res);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const favorite = req.query.favorite === "true";
+  getAllContacts(req, res, page, limit, favorite);
 });
 
 router.get("/:contactId", async (req, res, next) => {
