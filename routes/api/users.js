@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../../models/users/user");
 const jwt = require("jsonwebtoken");
-const { signupSchema, loginSchema } = require("../../validation.js");
+const { signupSchema, loginSchema, patchUserSchema } = require("../../validation.js");
 const authMiddleware = require("../../middlewares/jwt.js");
 
 router.post("/signup", async (req, res, next) => {
@@ -73,12 +73,7 @@ router.post("/login", async (req, res) => {
 router.get("/logout", authMiddleware, async (req, res) => {
   try {
     const userId = res.locals.user._id;
-
     const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
 
     user.token = null;
     await user.save();
@@ -106,15 +101,16 @@ router.patch("/:userId", authMiddleware, async (req, res) => {
     const { subscription } = req.body;
     const { userId } = req.params;
 
+    const { error } = patchUserSchema.validate({ userId, subscription });
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
     if (!["starter", "pro", "business"].includes(subscription)) {
       return res.status(400).json({ message: "Invalid subscription value." });
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, { subscription }, { new: true });
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found." });
-    }
 
     return res.status(200).json({ message: "Subscription updated successfully.", user: updatedUser });
   } catch (err) {

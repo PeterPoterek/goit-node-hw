@@ -10,4 +10,9 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-module.exports = { signupSchema, loginSchema };
+const patchUserSchema = Joi.object({
+  userId: Joi.string().length(24).required(),
+  subscription: Joi.string().valid("starter", "pro", "business").required(),
+});
+
+module.exports = { signupSchema, loginSchema, patchUserSchema };
