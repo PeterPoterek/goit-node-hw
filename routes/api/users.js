@@ -16,9 +16,9 @@ const path = require("path");
 const { v4: uuidV4 } = require("uuid");
 
 const {
-    uploadMiddleware,
-    storeImageDir,
     isImageAndTransform,
+    storeImageDir,
+    uploadMiddleware,
 } = require("../../controllers/fileController/fileController.js");
 
 router.post("/signup", async (req, res, next) => {
