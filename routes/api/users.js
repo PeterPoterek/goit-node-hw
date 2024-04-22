@@ -7,11 +7,18 @@ const {
     loginSchema,
     patchUserSchema,
 } = require("../../validation.js");
+
 const authMiddleware = require("../../middlewares/jwt.js");
 const gravatar = require("gravatar");
 
+const fs = require("fs").promises;
+const path = require("path");
+const { v4: uuidV4 } = require("uuid");
+
 const {
     uploadMiddleware,
+    storeImageDir,
+    isImageAndTransform,
 } = require("../../controllers/fileController/fileController.js");
 
 router.post("/signup", async (req, res, next) => {
@@ -131,7 +138,24 @@ router.patch(
             return res.status(400).json({ message: "File is not a photo." });
         }
 
-        res.json(req.file);
+        const { path: temporaryPath } = req.file;
+        const extension = path.extname(temporaryPath);
+        const fileName = `${uuidV4()}${extension}`;
+        const filePath = path.join(storeImageDir, fileName);
+
+        try {
+            await fs.rename(temporaryPath, filePath);
+        } catch (e) {
+            await fs.unlink(temporaryPath);
+            return next(e);
+        }
+
+        const isValidAndTransform = await isImageAndTransform(filePath);
+        if (!isValidAndTransform) {
+            await fs.unlink(filePath);
+            return res.status(400).json({ message: "Invalid file format" });
+        }
+        res.redirect(`/avatars/${fileName}`);
     }
 );
 
