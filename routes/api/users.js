@@ -4,6 +4,7 @@ const User = require("../../models/users/user");
 const jwt = require("jsonwebtoken");
 const { signupSchema, loginSchema, patchUserSchema } = require("../../validation.js");
 const authMiddleware = require("../../middlewares/jwt.js");
+const gravatar = require("gravatar");
 
 router.post("/signup", async (req, res, next) => {
   const { error } = signupSchema.validate(req.body);
@@ -21,7 +22,9 @@ router.post("/signup", async (req, res, next) => {
   }
 
   try {
-    const newUser = new User({ email });
+    const avatarURL = gravatar.url(email, { s: "200", d: "retro" });
+
+    const newUser = new User({ email, avatarURL });
     await newUser.setPassword(password);
     await newUser.save();
 
