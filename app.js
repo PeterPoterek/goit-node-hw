@@ -7,6 +7,12 @@ const usersRouter = require("./routes/api/users");
 
 const setJWTStrategy = require("./config/jwt");
 
+const path = require("path");
+
+const avatarDir = path.join(process.cwd(), "public/avatars");
+
+console.log(avatarDir);
+
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -16,6 +22,8 @@ app.use(cors());
 app.use(express.json());
 
 setJWTStrategy();
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/users", usersRouter);
