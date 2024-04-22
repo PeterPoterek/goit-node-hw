@@ -138,27 +138,34 @@ router.patch(
             return res.status(400).json({ message: "File is not a photo." });
         }
 
-        const { path: temporaryPath } = req.file;
-        const extension = path.extname(temporaryPath);
-        const fileName = `${uuidV4()}${extension}`;
-        const filePath = path.join(storeImageDir, fileName);
+        const { path: temporaryPath, filename } = req.file;
+        const filePath = path.join(storeImageDir, filename);
 
         try {
-            await fs.rename(temporaryPath, filePath);
-        } catch (e) {
-            await fs.unlink(temporaryPath);
-            return next(e);
-        }
+            await isImageAndTransform(temporaryPath);
 
-        const isValidAndTransform = await isImageAndTransform(filePath);
-        if (!isValidAndTransform) {
-            await fs.unlink(filePath);
-            return res.status(400).json({ message: "Invalid file format" });
+            await fs.rename(temporaryPath, filePath);
+
+            const userId = res.locals.user._id;
+            const user = await User.findByIdAndUpdate(
+                userId,
+                { avatarURL: `/avatars/${filename}` },
+                { new: true }
+            );
+
+            res.status(200).json({
+                message: "Avatar uploaded and URL saved successfully.",
+                user: {
+                    email: user.email,
+                    avatarURL: user.avatarURL,
+                },
+            });
+        } catch (error) {
+            console.error("Error processing avatar:", error);
+            return res.status(500).json({ message: "Internal Server Error" });
         }
-        res.redirect(`/avatars/${fileName}`);
     }
 );
-
 router.patch("/:userId", authMiddleware, async (req, res) => {
     try {
         const { subscription } = req.body;
