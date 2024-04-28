@@ -15,11 +15,40 @@ const fs = require("fs").promises;
 const path = require("path");
 const { v4: uuidV4 } = require("uuid");
 
+const { sendVerificationEmail } = require("../../controllers/email/email.js");
+
 const {
     isImageAndTransform,
     storeImageDir,
     uploadMiddleware,
 } = require("../../controllers/fileController/fileController.js");
+
+router.get("/verify/:verificationToken", async (req, res) => {
+    const { verificationToken } = req.params;
+
+    try {
+        const user = await User.findOne({ verificationToken });
+
+        if (!user) {
+            return res.status(404).json({ message: "Not Found" });
+        }
+
+        if (verificationToken) {
+            user.verificationToken = null;
+            user.verify = true;
+            await user.save();
+
+            return res.status(200).json({ message: "Successful response" });
+        } else {
+            return res
+                .status(400)
+                .json({ message: "Invalid verification token" });
+        }
+    } catch (error) {
+        console.error("Error verifying email:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
 
 router.post("/signup", async (req, res, next) => {
     const { error } = signupSchema.validate(req.body);
@@ -30,20 +59,27 @@ router.post("/signup", async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }, { _id: 1 }).lean();
-
-    if (user) {
-        return res.status(409).json({ message: `${email} is already taken.` });
-    }
-
     try {
-        const avatarURL = gravatar.url(email, { s: "200", d: "retro" });
+        const userExists = await User.findOne({ email });
 
-        const newUser = new User({ email, avatarURL });
+        if (userExists) {
+            return res
+                .status(409)
+                .json({ message: `${email} is already taken.` });
+        }
+
+        const avatarURL = gravatar.url(email, { s: "200", d: "retro" });
+        const verificationToken = uuidV4().replace(/-/g, "").substring(0, 20);
+
+        const newUser = new User({ email, avatarURL, verificationToken });
         await newUser.setPassword(password);
         await newUser.save();
 
-        res.status(201).json({ message: `${email} - User Created.` });
+        await sendVerificationEmail(email, verificationToken, req);
+
+        res.status(201).json({
+            message: `${email} - User Created. Verification email sent.`,
+        });
     } catch (err) {
         next(err);
     }
