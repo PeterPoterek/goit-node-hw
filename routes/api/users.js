@@ -23,6 +23,37 @@ const {
     uploadMiddleware,
 } = require("../../controllers/fileController/fileController.js");
 
+router.post("/verify", async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res
+            .status(400)
+            .json({ message: "Missing required field email" });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.verify) {
+            return res
+                .status(400)
+                .json({ message: "Verification has already been passed" });
+        }
+
+        await sendVerificationEmail(email, user.verificationToken, req);
+
+        return res.status(200).json({ message: "Verification email sent" });
+    } catch (error) {
+        console.error("Error resending verification email:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 router.get("/verify/:verificationToken", async (req, res) => {
     const { verificationToken } = req.params;
 
