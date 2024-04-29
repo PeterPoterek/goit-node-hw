@@ -1,5 +1,7 @@
 const nodemailer = require("nodemailer");
 const sgMail = require("@sendgrid/mail");
+const ejs = require("ejs");
+const path = require("path");
 require("dotenv").config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -19,11 +21,16 @@ module.exports = {
                 "host"
             )}/api/users/verify/${verificationToken}`;
 
+            const html = await ejs.renderFile(
+                path.join(__dirname, "../../views/verificationEmail.ejs"),
+                { verificationLink }
+            );
+
             const mailOptions = {
                 to: email,
                 from: process.env.SENDER_EMAIL,
                 subject: "Verify Your Email",
-                text: `Please click the following link to verify your email: ${verificationLink}`,
+                html: html,
             };
 
             await transporter.sendMail(mailOptions);
